@@ -451,14 +451,19 @@ def main():
     application.add_handler(CommandHandler("status", cmd_status))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu))
     application.add_handler(CommandHandler("testadmin", test_admin))
+
     application.add_handler(CommandHandler("pdf", pdf_command))
-   application.add_handler(CommandHandler("profile", profile_menu))
-   application.add_handler(build_profile_wizard())
-   application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:cancel$"))
-   application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:export$"))
+    application.add_handler(CommandHandler("profile", profile_menu))
+    application.add_handler(build_profile_wizard())
 
+    application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:cancel$"))
+    application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:export$"))
 
-    application.job_queue.run_repeating(check_new_jobs, interval=CHECK_EVERY_SECONDS, first=10)
+    application.job_queue.run_repeating(
+        check_new_jobs,
+        interval=CHECK_EVERY_SECONDS,
+        first=10
+    )
 
     init_db()
     application.run_polling()

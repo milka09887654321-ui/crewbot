@@ -3,11 +3,12 @@ import re
 import sqlite3
 from datetime import datetime, timezone
 
+from db import init_db
+
 import requests
 from bs4 import BeautifulSoup
-
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
+from telegram.ext  import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
@@ -444,6 +445,7 @@ def main():
 
     application.job_queue.run_repeating(check_new_jobs, interval=CHECK_EVERY_SECONDS, first=10)
 
+    init_db()
     application.run_polling()
 
 import os

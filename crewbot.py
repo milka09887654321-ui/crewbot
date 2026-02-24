@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 
 from pdf_gen import generate_profile_pdf
 
+from profile_store import get_profile, upsert_profile
+
 from db import init_db
 
 import requests
@@ -476,7 +478,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ⬇⬇⬇ ВОТ ЗДЕСЬ ВСТАВИТЬ ⬇⬇⬇
 
 async def pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    profile = get_profile(update.effective_user.id)
+    if not profile:
+        await update.message.reply_text("Profile not found. Use /profile first.")
+        return
+
+    pdf_file = generate_profile_pdf(profile)
+    await update.message.reply_document(pdf_file, filename="Seafarer_Profile.pdf")
 
     from db import get_conn
     with get_conn() as conn:

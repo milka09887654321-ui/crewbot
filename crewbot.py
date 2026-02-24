@@ -7,6 +7,11 @@ from pdf_gen import generate_profile_pdf
 
 from profile_store import get_profile, upsert_profile
 
+from profile_wizard import profile_menu, build_profile_wizard
+
+from telegram.ext import CallbackQueryHandler
+
+
 from db import init_db
 
 import requests
@@ -447,6 +452,10 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu))
     application.add_handler(CommandHandler("testadmin", test_admin))
     application.add_handler(CommandHandler("pdf", pdf_command))
+   application.add_handler(CommandHandler("profile", profile_menu))
+   application.add_handler(build_profile_wizard())
+   application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:cancel$"))
+   application.add_handler(CallbackQueryHandler(profile_menu, pattern="^profile:export$"))
 
 
     application.job_queue.run_repeating(check_new_jobs, interval=CHECK_EVERY_SECONDS, first=10)

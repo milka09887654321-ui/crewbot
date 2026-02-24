@@ -440,11 +440,31 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("status", cmd_status))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu))
+    application.add_handler(CommandHandler("testadmin", test_admin))
 
     application.job_queue.run_repeating(check_new_jobs, interval=CHECK_EVERY_SECONDS, first=10)
 
     application.run_polling()
 
+import os
+from telegram import Update
+from telegram.ext import ContextTypes, CommandHandler
+
+async def test_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    admin_chat_id = int(os.getenv("ADMIN_CHAT_ID", "0"))
+    
+    if admin_chat_id == 0:
+        await update.message.reply_text("ADMIN_CHAT_ID not found")
+        return
+
+    await context.bot.send_message(
+        chat_id=admin_chat_id,
+        text="Admin test message ✅"
+    )
+
+    await update.message.reply_text("Я отправил сообщение в админ-чат ✅")
+
 
 if __name__ == "__main__":
     main()
+    

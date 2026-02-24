@@ -3,6 +3,8 @@ import re
 import sqlite3
 from datetime import datetime, timezone
 
+from pdf_gen import generate_profile_pdf
+
 from db import init_db
 
 import requests
@@ -442,6 +444,8 @@ def main():
     application.add_handler(CommandHandler("status", cmd_status))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu))
     application.add_handler(CommandHandler("testadmin", test_admin))
+    application.add_handler(CommandHandler("pdf", pdf_command))
+
 
     application.job_queue.run_repeating(check_new_jobs, interval=CHECK_EVERY_SECONDS, first=10)
 
@@ -465,6 +469,33 @@ async def test_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text("Я отправил сообщение в админ-чат ✅")
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ...
+
+# ⬇⬇⬇ ВОТ ЗДЕСЬ ВСТАВИТЬ ⬇⬇⬇
+
+async def pdf_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    from db import get_conn
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM profile WHERE user_id = ?", (user_id,))
+        row = cur.fetchone()
+
+    if not row:
+        await update.message.reply_text("Profile not found. Use /profile first.")
+        return
+
+    profile_dict = dict(row)
+    pdf_file = generate_profile_pdf(profile_dict)
+
+    await update.message.reply_document(
+        document=pdf_file,
+        filename="Seafarer_Profile.pdf")
+
+# ⬆⬆⬆ А НЕ В САМОМ НИЗУ ⬆⬆⬆
 
 
 if __name__ == "__main__":
